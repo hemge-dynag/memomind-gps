@@ -10,8 +10,10 @@ import {
   encodeReset,
   decodeEvent,
 } from './protocol.js';
+import { detectLocale, getStrings } from './translations.js';
 
 const STORAGE_KEY = 'gps';
+const S = getStrings(detectLocale());
 
 const gm = createGMPlugin();
 
@@ -166,9 +168,29 @@ function render() {
   speedEl.textContent = `${speedKmh.toFixed(1)} km/h`;
 }
 
+function applyStrings() {
+  document.title = S.appTitle;
+  document.documentElement.lang = detectLocale();
+  const set = (id, text) => {
+    const el = document.querySelector(`#${id}`);
+    if (el) el.textContent = text;
+  };
+  set('app-title', S.appTitle);
+  set('label-distance', S.metricDistance);
+  set('label-duration', S.metricDuration);
+  set('label-pace', S.metricPace);
+  set('label-speed', S.metricSpeed);
+  set('stats-title', S.sectionStats);
+  set('stat-today-label', S.statToday);
+  set('stat-week-label', S.statWeek);
+  set('stat-week-sessions-label', S.statWeekSessions);
+  set('last-session', S.noSession);
+  startButton.textContent = S.startButton;
+}
+
 function renderControls() {
   startButton.disabled = !running && !gpsOk;
-  startButton.textContent = paused ? 'Reprendre' : running ? 'Pause' : 'Démarrer';
+  startButton.textContent = paused ? S.resumeButton : running ? S.pauseButton : S.startButton;
 }
 
 function renderStats() {
@@ -244,7 +266,7 @@ async function finishRun() {
   history[key] = entry;
   await persistState();
   renderStats();
-  lastSessionEl.textContent = `Dernière sortie : ${formatDistance(distanceM)} en ${formatDuration(seconds)}.`;
+  lastSessionEl.textContent = S.lastSession(formatDistance(distanceM), formatDuration(seconds));
   resetRun();
   await sendReset();
 }
@@ -321,16 +343,17 @@ async function start() {
   try {
     await gm.ready();
     await loadState();
+    applyStrings();
     render();
     renderStats();
     renderControls();
     const info = await gm.device.getInfo();
     connected = Boolean(info.connected);
-    setStatus(connected ? 'Lunettes connectées' : 'Lunettes déconnectées', connected ? 'ready' : 'error');
+    setStatus(connected ? S.statusConnected : S.statusDisconnected, connected ? 'ready' : 'error');
     await gm.device.subscribeEvents(['connection']);
     gm.device.onConnection((event) => {
       connected = Boolean(event.connected);
-      setStatus(connected ? 'Lunettes connectées' : 'Lunettes déconnectées', connected ? 'ready' : 'error');
+      setStatus(connected ? S.statusConnected : S.statusDisconnected, connected ? 'ready' : 'error');
       if (connected) void sendMetrics();
     });
     await startWatching();

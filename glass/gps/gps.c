@@ -51,13 +51,26 @@ typedef struct {
     uint8_t flags;
     bool have_metrics;
     uint32_t refresh_elapsed_ms;
-    uint8_t language; /* 0 = French (default), 1 = English */
+    uint8_t language; /* 0=fr 1=en 2=es 3=it 4=de 5=zh-CN */
 } gps_t;
 
-#define L(fr_str, en_str) (gp.language != 0U ? (en_str) : (fr_str))
+#define L(fr_str, en_str, es_str, it_str, de_str, zh_str) \
+    (gp.language == 1U ? (en_str) : gp.language == 2U ? (es_str) : \
+     gp.language == 3U ? (it_str) : gp.language == 4U ? (de_str) : \
+     gp.language == 5U ? (zh_str) : (fr_str))
 
 static gps_t gps_state;
 static gps_t *gps_ptr;
+
+static uint8_t gps_detect_language(const char *locale)
+{
+    if (locale[0] == 'e' && locale[1] == 'n') return 1U;
+    if (locale[0] == 'e' && locale[1] == 's') return 2U;
+    if (locale[0] == 'i' && locale[1] == 't') return 3U;
+    if (locale[0] == 'd' && locale[1] == 'e') return 4U;
+    if (locale[0] == 'z' && locale[1] == 'h') return 5U;
+    return 0U;
+}
 #define gp (*gps_ptr)
 
 #define number gm_plugin_lvgl_style_number
@@ -154,7 +167,7 @@ static void refresh_display(void)
         gp.ui->label_set_text(gp.pace_label, "");
         gp.ui->label_set_text(gp.heading_label, "");
         gp.ui->label_set_text(gp.hint_label,
-            L("En attente du telephone", "Waiting for the phone"));
+            L("En attente du telephone", "Waiting for the phone", "Esperando al teléfono", "In attesa del telefono", "Warte auf das Telefon", "正在等待手机"));
         return;
     }
 
@@ -165,16 +178,20 @@ static void refresh_display(void)
     gp.ui->label_set_text(gp.time_label, text);
 
     if (!(gp.flags & FLAG_GPS_OK)) {
-        gp.ui->label_set_text(gp.pace_label, L("Recherche GPS...", "Searching GPS..."));
+        gp.ui->label_set_text(gp.pace_label, L("Recherche GPS...", "Searching GPS...", "Buscando GPS...", "Ricerca GPS...", "Suche GPS...", "正在搜索 GPS..."));
         gp.ui->label_set_text(gp.heading_label, "");
     } else if (gp.pace_sec_km == 0U) {
-        gp.ui->label_set_text(gp.pace_label, L("Allure --", "Pace --"));
+        gp.ui->label_set_text(gp.pace_label, L("Allure --", "Pace --", "Ritmo --", "Ritmo --", "Tempo --", "配速 --"));
         gp.libc->snprintf(text, sizeof(text), "%s %u deg",
                           compass_point(gp.bearing), (unsigned int)gp.bearing);
         gp.ui->label_set_text(gp.heading_label, text);
     } else {
         gp.libc->snprintf(text, sizeof(text), L("Allure %u:%02u /km",
-                          "Pace %u:%02u /km"),
+                          "Pace %u:%02u /km",
+                          "Ritmo %u:%02u /km",
+                          "Ritmo %u:%02u /km",
+                          "Tempo %u:%02u /km",
+                          "配速 %u:%02u /km"),
                           (unsigned int)(gp.pace_sec_km / 60U),
                           (unsigned int)(gp.pace_sec_km % 60U));
         gp.ui->label_set_text(gp.pace_label, text);
@@ -186,11 +203,11 @@ static void refresh_display(void)
     }
 
     if (gp.flags & FLAG_PAUSED)
-        gp.ui->label_set_text(gp.hint_label, L("Bouton : reprendre", "Button: resume"));
+        gp.ui->label_set_text(gp.hint_label, L("Bouton : reprendre", "Button: resume", "Botón: reanudar", "Pulsante: riprendi", "Taste: Weiter", "按钮：继续"));
     else if (gp.flags & FLAG_RUNNING)
-        gp.ui->label_set_text(gp.hint_label, L("Bouton : pause", "Button: pause"));
+        gp.ui->label_set_text(gp.hint_label, L("Bouton : pause", "Button: pause", "Botón: pausa", "Pulsante: pausa", "Taste: Pause", "按钮：暂停"));
     else
-        gp.ui->label_set_text(gp.hint_label, L("Bouton : demarrer", "Button: start"));
+        gp.ui->label_set_text(gp.hint_label, L("Bouton : demarrer", "Button: start", "Botón: iniciar", "Pulsante: avvia", "Taste: Start", "按钮：开始"));
 }
 
 static void handle_downlink(const uint8_t *data, uint32_t length)
@@ -231,9 +248,8 @@ static gm_plugin_result_t gps_start(void *context)
 
     gp.language = 0U;
     if (gp.host->locale_get != 0 &&
-        gp.host->locale_get(locale) == GM_PLUGIN_OK &&
-        locale[0] == 'e' && locale[1] == 'n')
-        gp.language = 1U;
+        gp.host->locale_get(locale) == GM_PLUGIN_OK)
+        gp.language = gps_detect_language(locale);
 
     if (gp.host->display_get_info(&display) != GM_PLUGIN_OK ||
         display.width <= SCREEN_MARGIN * 2U ||
@@ -251,7 +267,7 @@ static gm_plugin_result_t gps_start(void *context)
     gp.ui->obj_align(gp.screen, GM_PLUGIN_LVGL_ALIGN_CENTER, 0, 0);
     style_panel(gp.screen, 0x00, 0, 0);
 
-    gp.title_label = make_label(gp.screen, L("Course", "Run"), 0x80);
+    gp.title_label = make_label(gp.screen, L("Course", "Run", "Carrera", "Corsa", "Lauf", "跑步"), 0x80);
     if (gp.title_label == 0) goto no_memory;
     gp.ui->obj_set_size(gp.title_label, display.width - SCREEN_MARGIN * 2U, 24);
     gp.ui->obj_align(gp.title_label, GM_PLUGIN_LVGL_ALIGN_TOP_MID, 0, 8);

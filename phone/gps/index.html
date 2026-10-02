@@ -10,7 +10,7 @@
   </head>
   <body>
     <header class="app-header">
-      <h1>Course / Rando</h1>
+      <h1 id="app-title">Course / Rando</h1>
       <span id="status" class="status">Démarrage…</span>
     </header>
 
@@ -18,20 +18,20 @@
       <section class="dashboard">
         <div class="metric primary-metric">
           <span id="distance" class="metric-value">0 m</span>
-          <span class="metric-label">Distance</span>
+          <span class="metric-label" id="label-distance">Distance</span>
         </div>
         <div class="metric-grid">
           <div class="metric">
             <span id="duration" class="metric-value">0:00</span>
-            <span class="metric-label">Durée</span>
+            <span class="metric-label" id="label-duration">Durée</span>
           </div>
           <div class="metric">
             <span id="pace" class="metric-value">--</span>
-            <span class="metric-label">Allure</span>
+            <span class="metric-label" id="label-pace">Allure</span>
           </div>
           <div class="metric">
             <span id="speed" class="metric-value">0.0 km/h</span>
-            <span class="metric-label">Vitesse</span>
+            <span class="metric-label" id="label-speed">Vitesse</span>
           </div>
         </div>
       </section>
@@ -41,19 +41,19 @@
       </section>
 
       <section class="stats">
-        <h2>Sorties</h2>
+        <h2 id="stats-title">Sorties</h2>
         <div class="stat-grid">
           <div class="stat">
             <span id="today-distance" class="stat-value">0 m</span>
-            <span class="stat-label">aujourd'hui</span>
+            <span class="stat-label" id="stat-today-label">aujourd'hui</span>
           </div>
           <div class="stat">
             <span id="week-distance" class="stat-value">0 m</span>
-            <span class="stat-label">7 derniers jours</span>
+            <span class="stat-label" id="stat-week-label">7 derniers jours</span>
           </div>
           <div class="stat">
             <span id="week-sessions" class="stat-value">0</span>
-            <span class="stat-label">sorties (7 j)</span>
+            <span class="stat-label" id="stat-week-sessions-label">sorties (7 j)</span>
           </div>
         </div>
         <p id="last-session" class="hint">Aucune sortie pour le moment.</p>
