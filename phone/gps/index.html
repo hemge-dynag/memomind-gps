@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+    <meta name="theme-color" content="#0b0e14">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+    <title>GM GPS</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Course / Rando</h1>
+      <span id="status" class="status">Démarrage…</span>
+    </header>
+
+    <main>
+      <section class="dashboard">
+        <div class="metric primary-metric">
+          <span id="distance" class="metric-value">0 m</span>
+          <span class="metric-label">Distance</span>
+        </div>
+        <div class="metric-grid">
+          <div class="metric">
+            <span id="duration" class="metric-value">0:00</span>
+            <span class="metric-label">Durée</span>
+          </div>
+          <div class="metric">
+            <span id="pace" class="metric-value">--</span>
+            <span class="metric-label">Allure</span>
+          </div>
+          <div class="metric">
+            <span id="speed" class="metric-value">0.0 km/h</span>
+            <span class="metric-label">Vitesse</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="controls">
+        <button id="start-button" class="primary" disabled>Démarrer</button>
+      </section>
+
+      <section class="stats">
+        <h2>Sorties</h2>
+        <div class="stat-grid">
+          <div class="stat">
+            <span id="today-distance" class="stat-value">0 m</span>
+            <span class="stat-label">aujourd'hui</span>
+          </div>
+          <div class="stat">
+            <span id="week-distance" class="stat-value">0 m</span>
+            <span class="stat-label">7 derniers jours</span>
+          </div>
+          <div class="stat">
+            <span id="week-sessions" class="stat-value">0</span>
+            <span class="stat-label">sorties (7 j)</span>
+          </div>
+        </div>
+        <p id="last-session" class="hint">Aucune sortie pour le moment.</p>
+      </section>
+    </main>
+
+    <script type="module" src="plugin.js"></script>
+  </body>
+</html>

@@ -1,0 +1,1 @@
+{"id":"com.dynag.gps.glass","name":"GM GPS","version":1,"abi_version":256,"provides":{"protocols":[{"id":"gm.gps","version":"1.0"}]}}
